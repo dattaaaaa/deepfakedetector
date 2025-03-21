@@ -56,9 +56,7 @@ The neural network architecture consists of:
 
 ## Dataset
 
-The model was trained on a combination of datasets:
-- Celeb-DF (real and fake videos)
-- DFDC (DeepFake Detection Challenge)
+The model was trained on a combination of dataset:
 - FaceForensics++ (FF)
 
 ## Requirements
