@@ -22,9 +22,9 @@ The system utilizes a combination of:
 
 ## Directory Structure
 
-- **Training/**: Contains Jupyter notebooks for model training and testing
+- **Training/**: Contains Jupyter notebook for model training and testing
   - `Model_train.ipynb`: Main notebook for training the model
-  - `Preprocess.ipynb`: Notebook for preprocessing data
+  - `Preprocess.py`: python file for preprocessing data
 
 - **Deepfake_detector_model_deployment/**: Contains the main model deployment app
   - `app.py`: Flask application for video analysis
