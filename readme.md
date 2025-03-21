@@ -118,6 +118,13 @@ See `requirements.txt` for detailed dependencies. Major requirements:
 
 5. Access the application at `http://localhost:3000`
 
+### Option 3: Use existing Docker-image
+1. Pull the image and run it:
+   ```
+   docker pull bharshavardhanreddy924/deepfake_detection
+   docker run -p 8080:8080 --name deepfake_detector bharshavardhanreddy924/deepfake_detection
+   ```
+
 ## Training Your Own Model
 
 1. Prepare your dataset with real and fake videos
