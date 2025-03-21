@@ -1,27 +1,35 @@
-FROM python:3.12.7-slim
+# Use Python 3.12 as base image
+FROM python:3.12
 
-# Environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Set the working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies needed for building packages like dlib
+# Copy the current directory contents into the container
+COPY . /app
+
+# Install required system dependencies
 RUN apt-get update && apt-get install -y \
     cmake \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    ffmpeg \
     build-essential \
+    libopenblas-dev \
+    liblapack-dev \
+    libx11-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install them
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Upgrade pip
+RUN pip install --upgrade pip
 
-# Copy the rest of your application code
-COPY . .
+# Install required Python packages
+RUN pip install --no-cache-dir dlib
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port (as defined in your app)
-EXPOSE 3000
+# Expose the port Flask runs on
+EXPOSE 5000
 
-# Run the application using gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:3000", "app:app"]
+# Run the Flask application
+CMD ["python", "app.py"]
