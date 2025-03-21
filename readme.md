@@ -62,7 +62,7 @@ The model was trained on a combination of dataset:
 ## Requirements
 
 See `requirements.txt` for detailed dependencies. Major requirements:
-- Python 3.x
+- Python 3.12.x
 - PyTorch
 - OpenCV
 - Flask
