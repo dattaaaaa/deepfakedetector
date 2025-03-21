@@ -157,4 +157,4 @@ The model achieves:
 
 - The developers of PyTorch, OpenCV, and Face Recognition
 - Contributors to the deepfake detection research community
-- Datasets used for training: Celeb-DF, DFDC, and FaceForensics++
+- Datasets used for training: FaceForensics++
