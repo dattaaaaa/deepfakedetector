@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepFake Detection System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4e54c8;
+            --secondary-color: #8f94fb;
+            --dark-color: #2c2f3f;
+            --light-color: #f8f9fa;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            background-color: white;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: none;
+        }
+
+        .card-title {
+            margin-bottom: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+            background-color: #f9f9f9;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: rgba(78, 84, 200, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 50px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 30px;
+            padding: 10px 30px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .result-card {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .result-header {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            color: white;
+        }
+
+        .fake-header {
+            background-color: var(--danger-color);
+        }
+
+        .real-header {
+            background-color: var(--success-color);
+        }
+
+        .result-body {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            background-color: white;
+        }
+
+        .progress-bar-container {
+            margin: 20px 0;
+        }
+
+        .confidence-label {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .loading-container {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .file-info {
+            display: none;
+            margin-top: 15px;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        .file-name {
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .file-size {
+            color: #666;
+        }
+
+        .remove-file {
+            color: var(--danger-color);
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: auto;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-shield-alt"></i> DeepFake Detection System</h2>
+                <p class="text-light mt-2 mb-0">Upload a video to check if it's real or a deepfake</p>
+            </div>
+            <div class="card-body">
+                <form id="upload-form">
+                    <div class="upload-area" id="upload-area">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <h4>Drag & Drop Video File</h4>
+                        <p>or</p>
+                        <button type="button" class="btn btn-primary" id="browse-btn">
+                            <i class="fas fa-folder-open me-2"></i>Browse Files
+                        </button>
+                        <input type="file" id="video-input" name="video" accept="video/*" style="display:none;">
+                        
+                        <div id="file-info" class="file-info">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <div class="file-name" id="file-name"></div>
+                                    <div class="file-size" id="file-size"></div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-times remove-file" id="remove-file"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary" id="detect-btn" disabled>
+                            <i class="fas fa-search me-2"></i>Detect Deepfake
+                        </button>
+                    </div>
+                    
+                    <div class="error-message" id="error-message"></div>
+                </form>
+                
+                <div class="loading-container" id="loading-container">
+                    <div class="spinner"></div>
+                    <h4>Analyzing Video...</h4>
+                    <p>This may take a few moments depending on the video size and complexity.</p>
+                </div>
+                
+                <div class="result-card" id="result-card">
+                    <div class="result-header" id="result-header">
+                        <h3 id="result-title">Analysis Result</h3>
+                    </div>
+                    <div class="result-body">
+                        <p id="result-description"></p>
+                        
+                        <div class="progress-bar-container">
+                            <div class="confidence-label">Confidence: <span id="confidence-value">0</span>%</div>
+                            <div class="progress">
+                                <div id="confidence-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-primary" id="analyze-another">
+                                <i class="fas fa-redo me-2"></i>Analyze Another Video
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 DeepFake Detection System | Powered by AI & Deep Learning</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Variables
+            let selectedFile = null;
+            
+            // DOM elements
+            const uploadForm = $('#upload-form');
+            const uploadArea = $('#upload-area');
+            const videoInput = $('#video-input');
+            const browseBtn = $('#browse-btn');
+            const detectBtn = $('#detect-btn');
+            const fileInfo = $('#file-info');
+            const fileName = $('#file-name');
+            const fileSize = $('#file-size');
+            const removeFile = $('#remove-file');
+            const loadingContainer = $('#loading-container');
+            const resultCard = $('#result-card');
+            const resultHeader = $('#result-header');
+            const resultTitle = $('#result-title');
+            const resultDescription = $('#result-description');
+            const confidenceValue = $('#confidence-value');
+            const confidenceBar = $('#confidence-bar');
+            const analyzeAnother = $('#analyze-another');
+            const errorMessage = $('#error-message');
+            
+            // Event listeners
+            browseBtn.on('click', function() {
+                videoInput.click();
+            });
+            
+            videoInput.on('change', function(e) {
+                handleFileSelect(e.target.files[0]);
+            });
+            
+            uploadArea.on('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).addClass('dragover');
+            });
+            
+            uploadArea.on('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+            });
+            
+            uploadArea.on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+                
+                const file = e.originalEvent.dataTransfer.files[0];
+                handleFileSelect(file);
+            });
+            
+            removeFile.on('click', function() {
+                resetFile();
+            });
+            
+            analyzeAnother.on('click', function() {
+                resetAll();
+            });
+            
+            uploadForm.on('submit', function(e) {
+                e.preventDefault();
+                
+                if (!selectedFile) {
+                    showError('Please select a video file first.');
+                    return;
+                }
+                
+                // Check file type
+                const validTypes = ['video/mp4', 'video/avi', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'];
+                if (!validTypes.includes(selectedFile.type)) {
+                    showError('Please upload a valid video file (mp4, avi, mov, wmv, mkv).');
+                    return;
+                }
+                
+                // Check file size (max 100MB)
+                if (selectedFile.size > 100 * 1024 * 1024) {
+                    showError('File size exceeds 100MB limit. Please upload a smaller file.');
+                    return;
+                }
+                
+                // Hide error if previously shown
+                errorMessage.hide();
+                
+                // Show loading state
+                uploadForm.hide();
+                loadingContainer.show();
+                
+                // Create form data
+                const formData = new FormData();
+                formData.append('video', selectedFile);
+                
+                // Send request
+                $.ajax({
+                    url: '/detect',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        loadingContainer.hide();
+                        
+                        if (response.status === 'error') {
+                            uploadForm.show();
+                            showError('Error: ' + response.message);
+                            return;
+                        }
+                        
+                        // Display result
+                        const result = response.output;
+                        const confidence = response.confidence;
+                        
+                        if (result === 'FAKE') {
+                            resultHeader.removeClass('real-header').addClass('fake-header');
+                            resultTitle.html('<i class="fas fa-exclamation-triangle me-2"></i> FAKE VIDEO DETECTED');
+                            resultDescription.html(`Our analysis indicates that this video appears to be a <strong>deepfake</strong>. 
+                                The AI model has detected manipulation patterns commonly found in artificially generated or altered videos.`);
+                            confidenceBar.removeClass('bg-success').addClass('bg-danger');
+                        } else {
+                            resultHeader.removeClass('fake-header').addClass('real-header');
+                            resultTitle.html('<i class="fas fa-check-circle me-2"></i> AUTHENTIC VIDEO');
+                            resultDescription.html(`Our analysis indicates that this video appears to be <strong>authentic</strong>. 
+                                No significant signs of digital manipulation or deepfake techniques were detected.`);
+                            confidenceBar.removeClass('bg-danger').addClass('bg-success');
+                        }
+                        
+                        // Update confidence
+                        confidenceValue.text(confidence);
+                        confidenceBar.css('width', confidence + '%');
+                        
+                        // Show result
+                        resultCard.show();
+                    },
+                    error: function(xhr) {
+                        loadingContainer.hide();
+                        uploadForm.show();
+                        
+                        let errorMsg = 'An error occurred during processing.';
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMsg = xhr.responseJSON.error;
+                        }
+                        
+                        showError('Error: ' + errorMsg);
+                    }
+                });
+            });
+            
+            // Functions
+            function handleFileSelect(file) {
+                if (!file) return;
+                
+                // Check if it's a video
+                if (!file.type.startsWith('video/')) {
+                    showError('Please select a video file.');
+                    return;
+                }
+                
+                selectedFile = file;
+                
+                // Show file info
+                fileName.text(file.name);
+                fileSize.text(formatFileSize(file.size));
+                fileInfo.show();
+                
+                // Enable detect button
+                detectBtn.prop('disabled', false);
+                
+                // Hide error if previously shown
+                errorMessage.hide();
+            }
+            
+            function resetFile() {
+                selectedFile = null;
+                videoInput.val('');
+                fileInfo.hide();
+                detectBtn.prop('disabled', true);
+                errorMessage.hide();
+            }
+            
+            function resetAll() {
+                resetFile();
+                resultCard.hide();
+                uploadForm.show();
+            }
+            
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' bytes';
+                else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+                else return (bytes / 1048576).toFixed(1) + ' MB';
+            }
+            
+            function showError(message) {
+                errorMessage.text(message).show();
+            }
+        });
+    </script>
+</body>
+</html>
