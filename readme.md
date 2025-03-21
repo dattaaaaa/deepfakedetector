@@ -156,9 +156,7 @@ The model achieves:
 
 
 
-## License
 
-[Include your license information here]
 
 ## Acknowledgments
 
